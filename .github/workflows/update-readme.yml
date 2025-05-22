@@ -1,0 +1,29 @@
+name: Update README every 20 minutes
+
+on:
+  schedule:
+    - cron: "*/20 * * * *"
+  workflow_dispatch:
+
+jobs:
+  update-readme:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+
+      - name: Set current time
+        run: echo "TIME=$(date -u '+%Y-%m-%d %H:%M:%S UTC ⏰')" >> $GITHUB_ENV
+
+      - name: Update README.md
+        run: |
+          sed -i '/<!--TIME-->/c\Last updated at: $TIME <!--TIME-->' README.md
+
+      - name: Commit and push changes
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add README.md
+          git commit -m "🔄 Auto update README: $TIME" || echo "No changes to commit"
+          git push
