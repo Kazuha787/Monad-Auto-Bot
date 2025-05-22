@@ -1,0 +1,45 @@
+name: Timestamp Update
+
+on:
+  schedule:
+    - cron: '*/25 * * * *'  # Runs every 25 minutes
+  workflow_dispatch:  # Allows manual triggering
+
+permissions:
+  contents: write
+
+jobs:
+  update_timestamp:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+        with:
+          persist-credentials: true
+          fetch-depth: 0
+
+      - name: Configure Git
+        run: |
+          git config --global user.email "devsinghharsh000@gmail.com"
+          git config --global user.name "Kazuha787"
+
+      - name: Pull Latest Changes
+        run: |
+          git fetch origin main
+          git reset --hard origin/main
+
+      - name: Update Timestamp
+        run: |
+          echo "Updated on $(date '+%Y-%m-%d %H:%M:%S')" > stamp.txt
+          git add stamp.txt
+
+      - name: Commit Changes
+        run: |
+          commit_messages=("Update: ⏰" "Refresh: 🔄" "Renew: 🌟" "Revise: 📝")
+          random_msg=${commit_messages[$RANDOM % ${#commit_messages[@]}]}
+          git commit -m "$random_msg" || echo "No changes to commit."
+
+      - name: Push Changes
+        run: |
+          git push origin main --force
